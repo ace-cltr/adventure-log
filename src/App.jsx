@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 // and these are only to define where these links will ake you in the base of pathName so for UI there is NavLink and Link that
 // defines where to jump based on some UI
 
-const BASE_URL = "http://localhost:9000";
+const BASE_URL = "http://localhost:8000";
 
 export default function App() {
   const [cities, setCities] = useState([]);
