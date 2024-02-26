@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import styles from "./CityItem.module.css";
 
 const formatDate = (date) =>
@@ -7,15 +8,22 @@ const formatDate = (date) =>
     year: "numeric",
   }).format(new Date(date));
 
-export default function CityItem({ city }) {
-  // const {cityName, emoji, date} = city
+  // web RTC ? 
 
+export default function CityItem({ city }) {
+  
+  const {cityName, emoji, date, id, position} = city
+
+  // to={`${id}?lat=${position.lat}&lng=${position.lng}`} do in this line we are sending data as a query string 
+  // it can be accessed via any component now. So now we can use this like global state without drilling prop check map component
   return (
-    <li className={styles.cityItem}>
+    <li>
+      <Link className={styles.cityItem} to={`${id}?lat=${position.lat}&lng=${position.lng}`} >
       <span className={styles.emoji}>{city.emoji}</span>
       <h3 className={styles.name}>{city.cityName}</h3>
       <time className={styles.date}>{formatDate(city.date)}</time>
       <button className={styles.deleteBtn}>&times;</button>
+      </Link>
     </li>
   );
 }
