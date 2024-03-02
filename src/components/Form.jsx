@@ -40,7 +40,7 @@ function Form() {
           value={date}
         />
       </div>
-
+      
       <div className={styles.row}>
         <label htmlFor="notes">Notes about your trip to {cityName}</label>
         <textarea
