@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
-
+import { useCities } from "../contexts/CityContext";
 
 import styles from "./Form.module.css";
 import Button from "./Button";
 import ButtonBack from "./ButtonBack";
 import { useUrlPosition } from "../hooks/useUrlPosition";
-import Message from "./Message"
-import Spinner from "./Spinner"
+import Message from "./Message";
+import Spinner from "./Spinner";
+import { useNavigate } from "react-router";
 
 export function convertToEmoji(countryCode) {
   const codePoints = countryCode
@@ -28,31 +29,35 @@ function Form() {
   const [date, setDate] = useState(new Date());
   const [notes, setNotes] = useState("");
   const [emoji, setEmoji] = useState("");
-  const [locationError, setLocationError] = useState("")
+  const [locationError, setLocationError] = useState("");
+  const { addNewCity, isLoading } = useCities();
+  const navigate = useNavigate();
 
   const [mapLat, mapLng] = useUrlPosition();
-  console.log(mapLat);
+
   const [isLoadingCityName, setIsLoadingCityName] = useState(false);
 
   useEffect(() => {
-    if(!mapLat && !mapLng) return
+    if (!mapLat && !mapLng) return;
     async function getCityName() {
       try {
         setIsLoadingCityName(true);
-        setLocationError("")
+        setLocationError("");
         const res = await fetch(
           `${BASE_URL}latitude=${mapLat}&longitude=${mapLng}`
         );
         const data = await res.json();
         if (!data.countryCode) {
-          throw new Error("That doesn't seems to be a city click somewhere else");
+          throw new Error(
+            "That doesn't seems to be a city click somewhere else"
+          );
         }
         console.log(data);
         setCityName(data.city || data.locality || "");
         setCountry(data.countryName || "");
         setEmoji(convertToEmoji(data.countryCode));
       } catch (err) {
-        setLocationError(err.message)
+        setLocationError(err.message);
       } finally {
         setIsLoadingCityName(false);
       }
@@ -60,12 +65,39 @@ function Form() {
     getCityName();
   }, [mapLat, mapLng]);
 
-  if(isLoadingCityName) return <Spinner />
-  if(locationError) return <Message message={locationError} />
-  if(!mapLat && !mapLng) return <Message message="start by clicking on the map" />
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!cityName || !date) return;
+    const newCity = {
+      cityName,
+      country,
+      emoji,
+      date,
+      notes,
+      position: {
+        lat: mapLat,
+        lng: mapLng,
+      },
+    };
+    await addNewCity(newCity);
+    setCityName("");
+    setCountry("");
+    setEmoji("");
+    setDate(new Date());
+    setNotes("");
+    navigate("/app/city");
+  }
+
+  if (isLoadingCityName) return <Spinner />;
+  if (locationError) return <Message message={locationError} />;
+  if (!mapLat && !mapLng)
+    return <Message message="start by clicking on the map" />;
 
   return (
-    <form className={styles.form}>
+    <form
+      className={`${styles.form} ${isLoading ? styles.loading : ""}`}
+      onSubmit={handleSubmit}
+    >
       <div className={styles.row}>
         <label htmlFor="cityName">City name</label>
         <input
@@ -73,17 +105,21 @@ function Form() {
           onChange={(e) => setCityName(e.target.value)}
           value={cityName}
         />
-        <span className={styles.flag}>{emoji}</span> 
+        <span className={styles.flag}>{emoji}</span>
       </div>
 
       <div className={styles.row}>
-        <label htmlFor="date">When did you go to {cityName}?</label>
+        <label htmlFor="date">{`When did you go to ${cityName}?`}</label>
         {/* <input
           id="date"
           onChange={(e) => setDate(e.target.value)}
           value={date}
         /> */}
-        <DatePicker id="date" onChange={(date)=>setDate(date)} selected={date} />
+        <DatePicker
+          id="date"
+          onChange={(date) => setDate(date)}
+          selected={date}
+        />
       </div>
 
       <div className={styles.row}>

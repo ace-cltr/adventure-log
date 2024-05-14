@@ -19,13 +19,21 @@ export default function CityItem({ city }) {
   // it can be accessed via any component now. So now we can use this like global state without drilling prop check map component
 
   // className={`${styles.cityItem} ${currentCity.id === id ? styles['cityItem--active'] : ''}`}  another trick to access active class in modules css
+
+function handleDelete(){
+  const currentCity = {
+    cityName, 
+    id,
+  }
+  }
+
   return (
     <li>
       <Link className={`${styles.cityItem} ${currentCity.id === id ? styles['cityItem--active'] : ''}`} to={`${id}?lat=${position.lat}&lng=${position.lng}`} >
       <span className={styles.emoji}>{city.emoji}</span>
       <h3 className={styles.name}>{city.cityName}</h3>
       <time className={styles.date}>{formatDate(city.date)}</time>
-      <button className={styles.deleteBtn}>&times;</button>
+      <button className={styles.deleteBtn} onClick={handleDelete}>&times;</button>
       </Link>
     </li>
   );
